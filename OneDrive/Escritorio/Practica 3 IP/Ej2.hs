@@ -44,3 +44,19 @@ sumaDistintos a b c | a  /= b && a /= c && b /= c = a + b + c
                     | a == b && a /= c = c
                     | a /= b && b == c = a
                     | otherwise = b
+
+-- h)
+esMultiploDe :: Integer -> Integer -> Bool
+esMultiploDe n m | mod  n m == 0 || mod m n == 0 = True
+                 | otherwise     = False
+
+-- i)
+digitoUnidades :: Integer -> Integer
+digitoUnidades  n | n >= 0 = mod n 10
+                  | otherwise  = abs  n `mod` 10
+
+-- j)
+digitoDecenas :: Integer -> Integer
+digitoDecenas n | n >= 0 = digitoUnidades (div n 10)
+                | n < 0 = digitoUnidades (div (-n) 10)
+                  
