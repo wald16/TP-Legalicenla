@@ -14,6 +14,11 @@ import Data.Char
 -- Integrantes que abandonaron la materia: {En caso que haya abandonado la materia alg#n
                         -- integrante, completar con los dni y apellidos, sino dejar vac!o}
 
+-- TODO!!!!!!
+-- Sacar los '$'
+
+-- Funciones Auxiliares --
+
 -- EJ 1
 
 testChar :: Int -> String
@@ -28,28 +33,49 @@ letraANatural :: Char -> Int
 letraANatural char = ord char - 97
 
 -- EJ 3
-
-
 desplazar :: Char -> Int -> Char
 desplazar char numba | not $ esMinuscula char = char
                      | otherwise = chr (mod (letraANatural char + numba) 26 + 97)
 
 -- EJ 4
 cifrar :: String -> Int -> String
-cifrar _ _ = "frpsxwdflrq"
+cifrar [] _ = []
+cifrar (x:frase) numba | not $ esMinuscula x = x : cifrar frase numba
+                       | otherwise = (desplazar x numba) : cifrar frase numba
 
 -- EJ 5
 descifrar :: String -> Int -> String
-descifrar _ _ = "computacion"
-
+descifrar [] _ = []
+descifrar (x:frase) numba | not $ esMinuscula x = x : descifrar frase numba
+                          | otherwise = (desplazar x (- numba)) : descifrar frase numba
 -- EJ 6
 cifrarLista :: [String] -> [String]
-cifrarLista _ = ["compu", "mbcp", "kpvtq"]
+cifrarLista lista = cifrarListaAux lista 0
+   where
+       cifrarListaAux :: [String] -> Int -> [String]
+       cifrarListaAux [] _ = []
+       cifrarListaAux (x:xs) add = cifrar x add : cifrarListaAux xs (add + 1)
 
 -- EJ 7
 frecuencia :: String -> [Float]
-frecuencia _ = [16.666668,0.0,0.0,0.0,16.666668,0.0,0.0,0.0,0.0,0.0,0.0,33.333336,0.0,0.0,0.0,0.0,0.0,16.666668,0.0,16.666668,0.0,0.0,0.0,0.0,0.0,0.0]
+frecuencia frase = frecuenciaAux frase 97
+    where 
+        frecuenciaAux :: String -> Int -> [Float]
+        frecuenciaAux _ 123 = []
+        frecuenciaAux frase add | not $ (chr add `elem` frase) = 0.0 : frecuenciaAux frase (add + 1)
+                                | otherwise = porcentaje (chr add) frase : frecuenciaAux frase (add + 1)
 
+        porcentaje :: Char -> String -> Float
+        porcentaje char frase = (cuantasVeces char frase) * 100 / fromIntegral (length frase) 
+
+        cuantasVeces :: Char -> String -> Float
+        cuantasVeces _ [] = 0.0
+        cuantasVeces x (y:ys) | x == y = 1.0 + cuantasVeces x ys
+                              | otherwise = cuantasVeces x ys
+
+-- [16.666668,0.0,0.0,0.0,16.666668,0.0,0.0,0.0,0.0,0.0,0.0,33.333336,0.0,0.0,0.0,0.0,0.0,16.666668,0.0,16.666668,0.0,0.0,0.0,0.0,0.0,0.0]
+
+-- [16.666666,0.0,0.0,0.0,16.666666,0.0,0.0,0.0,0.0,0.0,0.0,33.333332,0.0,0.0,0.0,0.0,0.0,16.666666,0.0,16.666666,0.0,0.0,0.0,0.0,0.0,0.0]
 -- Ej 8
 cifradoMasFrecuente :: String -> Int -> (Char, Float)
 cifradoMasFrecuente _ _ = ('o', 33.333336)
