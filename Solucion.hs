@@ -78,15 +78,48 @@ frecuencia frase = frecuenciaAux frase 97
 -- [16.666666,0.0,0.0,0.0,16.666666,0.0,0.0,0.0,0.0,0.0,0.0,33.333332,0.0,0.0,0.0,0.0,0.0,16.666666,0.0,16.666666,0.0,0.0,0.0,0.0,0.0,0.0]
 -- Ej 8
 cifradoMasFrecuente :: String -> Int -> (Char, Float)
-cifradoMasFrecuente _ _ = ('o', 33.333336)
+cifradoMasFrecuente frase numba = (letraMasFrecuente fraseCifrada, elementoMasGrande frecuenciaDeLaFraseCifrada)
+    where
+        fraseCifrada = cifrar frase numba :: String
+        frecuenciaDeLaFraseCifrada = frecuencia fraseCifrada :: [Float]
+
+        letraMasFrecuente :: String -> Char
+        letraMasFrecuente cifrado = chr (length (hastaElementoMasGrande frecuenciaDeLaFraseCifrada) + 97)
+
+
+        elementoMasGrande :: [Float] -> Float
+        elementoMasGrande [x] = x
+        elementoMasGrande (x:y:frecuencia) | x >= y = elementoMasGrande (x:frecuencia)
+                                           | otherwise = elementoMasGrande (y:frecuencia)
+
+
+        hastaElementoMasGrande :: [Float] -> [Float]
+        hastaElementoMasGrande (x:frecuencia) | x == (elementoMasGrande frecuenciaDeLaFraseCifrada) = [] 
+                                              | otherwise = x : hastaElementoMasGrande frecuencia 
+
 
 -- EJ 9
-esDescifrado :: String -> String -> Bool
-esDescifrado _ _ = False
+esDescifrado :: String -> String -> Bool 
+esDescifrado frase1 frase2 = esDescifradoAux frase1 frase2 0
+     where
+        esDescifradoAux frase1 frase2 n | n >= 25 = False
+                                        | frase2 == cifrar frase1 n = True 
+                                        | otherwise = esDescifradoAux frase1 frase2 (n + 1)
 
 -- EJ 10
 todosLosDescifrados :: [String] -> [(String, String)]
-todosLosDescifrados _ = [("compu", "frpsx"), ("frpsx", "compu")]
+todosLosDescifrados lista = superRecursion lista
+    where 
+        todosLosDescifradosAux :: [String] -> [(String, String)]
+        todosLosDescifradosAux [] = []
+        todosLosDescifradosAux [x] = []
+        todosLosDescifradosAux (x:y:xs) | esDescifrado x y = (x, y) : (y, x) : todosLosDescifrados (x:xs)
+                                        | otherwise = todosLosDescifrados (x:xs)
+
+        superRecursion :: [String] -> [(String, String)]
+        superRecursion [] = []
+        superRecursion (x:xs) = todosLosDescifradosAux (x:xs) ++ todosLosDescifradosAux xs
+        
 
 -- EJ 11
 expandirClave :: String -> Int -> String
