@@ -15,16 +15,24 @@ import Data.Char
                         -- integrante, completar con los dni y apellidos, sino dejar vac!o}
 
 -- EJ 1
+
+testChar :: Int -> String
+testChar 123 = []
+testChar start = chr start : testChar (start + 1)
+
 esMinuscula :: Char -> Bool
-esMinuscula _ = True
+esMinuscula letra = ord letra >= 97 && ord letra <= 123
 
 -- EJ 2
 letraANatural :: Char -> Int
-letraANatural _ = 1
+letraANatural char = ord char - 97
 
 -- EJ 3
+
+
 desplazar :: Char -> Int -> Char
-desplazar _ _ = 'd'
+desplazar char numba | not $ esMinuscula char = char
+                     | otherwise = chr (mod (letraANatural char + numba) 26 + 97)
 
 -- EJ 4
 cifrar :: String -> Int -> String
