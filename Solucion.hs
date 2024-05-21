@@ -66,12 +66,16 @@ frecuencia frase = frecuenciaAux frase 97
                                 | otherwise = porcentaje (chr add) frase : frecuenciaAux frase (add + 1)
 
         porcentaje :: Char -> String -> Float
-        porcentaje char frase = (cuantasVeces char frase) * 100 / fromIntegral (length frase) 
+        porcentaje char frase = (cuantasVeces char frase) * 100 / cantidadDeMinusculas frase
 
         cuantasVeces :: Char -> String -> Float
         cuantasVeces _ [] = 0.0
         cuantasVeces x (y:ys) | x == y = 1.0 + cuantasVeces x ys
                               | otherwise = cuantasVeces x ys
+
+        cantidadDeMinusculas :: String -> Float
+        cantidadDeMinusculas (x:xs) | esMinuscula x = 1.0 + cantidadDeMinusculas xs
+                                    | otherwise = cantidadDeMinusculas xs
 
 -- [16.666668,0.0,0.0,0.0,16.666668,0.0,0.0,0.0,0.0,0.0,0.0,33.333336,0.0,0.0,0.0,0.0,0.0,16.666668,0.0,16.666668,0.0,0.0,0.0,0.0,0.0,0.0]
 
@@ -123,21 +127,73 @@ todosLosDescifrados lista = superRecursion lista
 
 -- EJ 11
 expandirClave :: String -> Int -> String
-expandirClave _ _ = "compucom"
+expandirClave clave n | n > length clave = expandirClave (clave ++ clave) n
+                      | otherwise = soltar clave (length clave - n)
+
+dropLast :: [a] -> [a]
+dropLast [x] = []
+dropLast (x:xs) = x : dropLast xs  
+
+soltar :: [a] -> Int -> [a]
+soltar lista 0 = lista
+soltar lista numba = soltar (dropLast lista) (numba - 1)  
 
 -- EJ 12
 cifrarVigenere :: String -> String -> String
-cifrarVigenere _ _ = "kdueciirqdv"
+cifrarVigenere [] _ = []
+cifrarVigenere frase clave = cifrarVigereneAux frase (expandirClave clave (length frase))
+    where
+        cifrarVigereneAux :: String -> String -> String
+        cifrarVigereneAux [] _ = []
+        cifrarVigereneAux (x:frase) (y:clave) | esMinuscula x = (cifrar [x] (letraANatural y)) ++ cifrarVigereneAux frase clave
+                                              | otherwise = cifrarVigereneAux frase clave
 
 -- EJ 13
 descifrarVigenere :: String -> String -> String
-descifrarVigenere _ _ = "computacion"
+descifrarVigenere [] _ = []
+descifrarVigenere frase clave = descifrarVigereneAux frase (expandirClave clave (length frase))
+    where
+        descifrarVigereneAux :: String -> String -> String
+        descifrarVigereneAux [] _ = []
+        descifrarVigereneAux (x:frase) (y:clave) | esMinuscula x = (descifrar [x] (letraANatural y)) ++ descifrarVigereneAux frase clave
+                                                 | otherwise = descifrarVigereneAux frase clave
 
 -- EJ 14
 peorCifrado :: String -> [String] -> String
-peorCifrado _ _ = "asdef"
+peorCifrado frase claves = encontrarPeorClave claves (todasLasDistancias frase (todosLosCifrados frase claves))
+     where
+         distanciaSecuencias :: String -> String -> Int
+         distanciaSecuencias [] [] = 0
+         distanciaSecuencias (x:xs) (y:ys) = letraANatural x - letraANatural y + distanciaSecuencias xs ys
 
+         todosLosCifrados :: String -> [String] -> [String]
+         todosLosCifrados _ [] = [] 
+         todosLosCifrados frase (x:claves) = cifrarVigenere frase x : todosLosCifrados frase claves
+
+         todasLasDistancias ::  String -> [String] -> [Int]
+         todasLasDistancias _ [] = []
+         todasLasDistancias frase (x:cifrados) = distanciaSecuencias frase x : todasLasDistancias frase cifrados
+         
+         encontrarPeorClave :: [String] -> [Int] -> String
+         encontrarPeorClave [x] _ = x
+         encontrarPeorClave (x:y:claves) (d1:d2:distancias) | d1 <= d2 = encontrarPeorClave (x:claves) (d1:distancias)
+                                                            | otherwise = encontrarPeorClave (y:claves) (d2:distancias)
+         
+         
 -- EJ 15
 combinacionesVigenere :: [String] -> [String] -> String -> [(String, String)]
-combinacionesVigenere _ _ _ = [("hola", "b")]
+combinacionesVigenere msjs claves cifrado = cifrarTodo msjs claves
 
+    where 
+        expansionClave :: String -> String -> String
+        expansionClave clave mensaje = expandirClave clave (length mensaje)
+
+        cifrarPrimero :: String -> [String] -> [(String, String)]
+        cifrarPrimero _ [] = []
+        cifrarPrimero mensaje (x:claves) | cifrarVigenere mensaje (expansionClave x mensaje) == cifrado = (mensaje, x) : cifrarPrimero mensaje claves
+                                         | otherwise = cifrarPrimero mensaje claves
+
+        cifrarTodo :: [String] -> [String] -> [(String, String)]
+        cifrarTodo [] _ = []
+        cifrarTodo (x:mensajes) claves = cifrarPrimero x claves ++ cifrarTodo mensajes claves
+      
